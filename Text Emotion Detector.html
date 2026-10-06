@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Text Emotion Detector</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'DM Sans', sans-serif;
+    background: #f7f3ff;
+    color: #302b3f;
+    min-height: 100vh;
+}
+
+header {
+    background: linear-gradient(135deg, #8e7dff, #c49cff);
+    color: white;
+    padding: 28px 7%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 27px;
+    font-weight: 700;
+}
+
+.badge {
+    background: rgba(255,255,255,0.2);
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 13px;
+}
+
+.container {
+    width: 86%;
+    max-width: 1150px;
+    margin: 35px auto;
+}
+
+.hero {
+    margin-bottom: 28px;
+}
+
+.hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 38px;
+    margin-bottom: 8px;
+}
+
+.hero p {
+    color: #746d82;
+}
+
+.main-grid {
+    display: grid;
+    grid-template-columns: 1fr 0.9fr;
+    gap: 25px;
+}
+
+.card {
+    background: white;
+    border-radius: 22px;
+    padding: 25px;
+    box-shadow: 0 10px 30px rgba(82, 67, 120, 0.08);
+}
+
+.card-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 18px;
+}
+
+textarea {
+    width: 100%;
+    height: 220px;
+    border: 2px solid #eee9fa;
+    border-radius: 16px;
+    padding: 17px;
+    resize: none;
+    outline: none;
+    font-family: inherit;
+    font-size: 15px;
+    color: #40394f;
+    transition: 0.3s;
+}
+
+textarea:focus {
+    border-color: #9b8cff;
+}
+
+.counter {
+    text-align: right;
+    font-size: 12px;
+    color: #9991a8;
+    margin-top: 7px;
+}
+
+.buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 18px;
+}
+
+button {
+    border: none;
+    padding: 12px 22px;
+    border-radius: 12px;
+    font-family: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.25s;
+}
+
+.analyze {
+    background: #8e7dff;
+    color: white;
+    flex: 1;
+}
+
+.analyze:hover {
+    background: #7663ef;
+    transform: translateY(-2px);
+}
+
+.clear {
+    background: #f0edf7;
+    color: #514a5d;
+}
+
+.clear:hover {
+    background: #e5e0ef;
+}
+
+.result {
+    text-align: center;
+    min-height: 320px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.emotion-icon {
+    width: 105px;
+    height: 105px;
+    background: #f1edff;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 55px;
+    margin-bottom: 15px;
+}
+
+.emotion-name {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 7px;
+}
+
+.confidence {
+    color: #81798e;
+    margin-bottom: 22px;
+}
+
+.meter {
+    width: 85%;
+    height: 11px;
+    background: #eeeaf5;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.meter-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #8e7dff, #c49cff);
+    border-radius: 20px;
+    transition: width 0.6s ease;
+}
+
+.score {
+    margin-top: 9px;
+    font-size: 13px;
+    color: #837b8e;
+}
+
+.emotion-list {
+    margin-top: 25px;
+}
+
+.emotion-row {
+    margin-bottom: 15px;
+}
+
+.row-head {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    margin-bottom: 6px;
+}
+
+.row-bar {
+    height: 8px;
+    background: #eeeaf5;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.row-fill {
+    height: 100%;
+    width: 0%;
+    border-radius: 20px;
+    background: #9b8cff;
+    transition: width 0.5s;
+}
+
+.history-card {
+    margin-top: 25px;
+}
+
+.history-item {
+    border: 1px solid #eee9f5;
+    border-radius: 13px;
+    padding: 13px;
+    margin-top: 10px;
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    align-items: center;
+}
+
+.history-text {
+    font-size: 13px;
+    color: #6d6577;
+    flex: 1;
+}
+
+.history-emotion {
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.empty {
+    text-align: center;
+    color: #aaa2b3;
+    padding: 20px;
+}
+
+footer {
+    text-align: center;
+    padding: 30px;
+    color: #958da1;
+    font-size: 13px;
+}
+
+@media(max-width: 800px) {
+    .main-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .hero h1 {
+        font-size: 30px;
+    }
+
+    header {
+        padding: 22px 5%;
+    }
+
+    .container {
+        width: 92%;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <div class="logo">MoodLens ✨</div>
+    <div class="badge">Application 2 • NLP</div>
+</header>
+
+<div class="container">
+
+    <div class="hero">
+        <h1>Text Emotion Detector</h1>
+        <p>Discover the emotion hidden inside your words.</p>
+    </div>
+
+    <div class="main-grid">
+
+        <div class="card">
+            <div class="card-title">Enter Your Text</div>
+
+            <textarea id="textInput"
+                maxlength="3000"
+                placeholder="Type something like: I am so happy today because I got my dream job!"></textarea>
+
+            <div class="counter">
+                <span id="charCount">0</span>/3000 characters
+            </div>
+
+            <div class="buttons">
+                <button class="analyze" onclick="analyzeEmotion()">
+                    Detect Emotion
+                </button>
+
+                <button class="clear" onclick="clearText()">
+                    Clear
+                </button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Emotion Result</div>
+
+            <div class="result">
+
+                <div class="emotion-icon" id="emotionIcon">💭</div>
+
+                <div class="emotion-name" id="emotionName">
+                    Waiting...
+                </div>
+
+                <div class="confidence" id="confidence">
+                    Enter text to begin analysis
+                </div>
+
+                <div class="meter">
+                    <div class="meter-fill" id="meterFill"></div>
+                </div>
+
+                <div class="score" id="score">
+                    Confidence: 0%
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <div class="card emotion-list">
+
+        <div class="card-title">Emotion Breakdown</div>
+
+        <div class="emotion-row">
+            <div class="row-head">
+                <span>😊 Joy</span>
+                <span id="joyValue">0%</span>
+            </div>
+            <div class="row-bar">
+                <div class="row-fill" id="joyBar"></div>
+            </div>
+        </div>
+
+        <div class="emotion-row">
+            <div class="row-head">
+                <span>😢 Sadness</span>
+                <span id="sadnessValue">0%</span>
+            </div>
+            <div class="row-bar">
+                <div class="row-fill" id="sadnessBar"></div>
+            </div>
+        </div>
+
+        <div class="emotion-row">
+            <div class="row-head">
+                <span>😡 Anger</span>
+                <span id="angerValue">0%</span>
+            </div>
+            <div class="row-bar">
+                <div class="row-fill" id="angerBar"></div>
+            </div>
+        </div>
+
+        <div class="emotion-row">
+            <div class="row-head">
+                <span>😨 Fear</span>
+                <span id="fearValue">0%</span>
+            </div>
+            <div class="row-bar">
+                <div class="row-fill" id="fearBar"></div>
+            </div>
+        </div>
+
+        <div class="emotion-row">
+            <div class="row-head">
+                <span>😲 Surprise</span>
+                <span id="surpriseValue">0%</span>
+            </div>
+            <div class="row-bar">
+                <div class="row-fill" id="surpriseBar"></div>
+            </div>
+        </div>
+
+        <div class="emotion-row">
+            <div class="row-head">
+                <span>❤️ Love</span>
+                <span id="loveValue">0%</span>
+            </div>
+            <div class="row-bar">
+                <div class="row-fill" id="loveBar"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="card history-card">
+
+        <div class="card-title">Recent Analysis</div>
+
+        <div id="history">
+            <div class="empty">No analysis yet.</div>
+        </div>
+
+    </div>
+
+</div>
+
+<footer>
+    Text & Speech Analysis Series • Application 2
+</footer>
+
+<script>
+
+const emotionWords = {
+
+    joy: {
+        words: {
+            happy: 3,
+            happiness: 3,
+            joyful: 3,
+            joy: 3,
+            excited: 3,
+            exciting: 2,
+            amazing: 2,
+            wonderful: 2,
+            fantastic: 2,
+            great: 2,
+            awesome: 2,
+            smile: 2,
+            smiling: 2,
+            laugh: 2,
+            laughing: 2,
+            fun: 1,
+            pleased: 2,
+            success: 2,
+            celebrate: 2,
+            celebration: 2
+        },
+        icon: "😊",
+        name: "Joy"
+    },
+
+    sadness: {
+        words: {
+            sad: 3,
+            sadness: 3,
+            unhappy: 3,
+            depressed: 3,
+            crying: 3,
+            cry: 2,
+            tears: 2,
+            lonely: 3,
+            loneliness: 3,
+            disappointed: 2,
+            disappointment: 2,
+            hurt: 2,
+            painful: 2,
+            pain: 2,
+            miserable: 3,
+            hopeless: 3,
+            upset: 2,
+            regret: 2,
+            loss: 2
+        },
+        icon: "😢",
+        name: "Sadness"
+    },
+
+    anger: {
+        words: {
+            angry: 3,
+            anger: 3,
+            furious: 3,
+            rage: 3,
+            hate: 3,
+            hated: 3,
+            hatred: 3,
+            annoying: 2,
+            annoyed: 2,
+            irritation: 2,
+            irritated: 2,
+            frustrated: 2,
+            frustration: 2,
+            stupid: 2,
+            unfair: 2,
+            awful: 2,
+            terrible: 2,
+            mad: 2
+        },
+        icon: "😡",
+        name: "Anger"
+    },
+
+    fear: {
+        words: {
+            afraid: 3,
+            fear: 3,
+            scared: 3,
+            scary: 3,
+            frightened: 3,
+            nervous: 2,
+            worried: 2,
+            worry: 2,
+            anxiety: 3,
+            anxious: 3,
+            danger: 3,
+            dangerous: 3,
+            panic: 3,
+            terrified: 3,
+            threat: 2,
+            risky: 2,
+            risk: 2
+        },
+        icon: "😨",
+        name: "Fear"
+    },
+
+    surprise: {
+        words: {
+            surprised: 3,
+            surprise: 3,
+            shocking: 3,
+            shocked: 3,
+            unexpected: 2,
+            suddenly: 2,
+            unbelievable: 2,
+            incredible: 2,
+            wow: 3,
+            unbelievable: 2,
+            astonished: 3,
+            amazed: 2
+        },
+        icon: "😲",
+        name: "Surprise"
+    },
+
+    love: {
+        words: {
+            love: 3,
+            loved: 3,
+            loving: 3,
+            adore: 3,
+            adored: 3,
+            affection: 2,
+            caring: 2,
+            care: 2,
+            sweetheart: 3,
+            lovely: 2,
+            romantic: 2,
+            romance: 2,
+            kiss: 2,
+            heart: 2,
+            beautiful: 2,
+            dear: 1
+        },
+        icon: "❤️",
+        name: "Love"
+    }
+};
+
+const textInput = document.getElementById("textInput");
+
+textInput.addEventListener("input", function() {
+    document.getElementById("charCount").textContent = this.value.length;
+});
+
+function analyzeEmotion() {
+
+    const text = textInput.value.trim();
+
+    if (!text) {
+        alert("Please enter some text first.");
+        return;
+    }
+
+    const words = text
+        .toLowerCase()
+        .replace(/[^\w\s']/g, " ")
+        .split(/\s+/);
+
+    let scores = {
+        joy: 0,
+        sadness: 0,
+        anger: 0,
+        fear: 0,
+        surprise: 0,
+        love: 0
+    };
+
+    words.forEach((word, index) => {
+
+        Object.keys(emotionWords).forEach(emotion => {
+
+            const value = emotionWords[emotion].words[word];
+
+            if (value) {
+
+                let multiplier = 1;
+
+                const previousWords = words.slice(
+                    Math.max(0, index - 2),
+                    index
+                );
+
+                if (
+                    previousWords.includes("not") ||
+                    previousWords.includes("never") ||
+                    previousWords.includes("no") ||
+                    previousWords.includes("don't") ||
+                    previousWords.includes("didn't") ||
+                    previousWords.includes("isn't") ||
+                    previousWords.includes("can't")
+                ) {
+                    multiplier = -1;
+                }
+
+                scores[emotion] += value * multiplier;
+            }
+        });
+    });
+
+    const positiveScores = Object.keys(scores).map(
+        key => Math.max(0, scores[key])
+    );
+
+    const total = positiveScores.reduce(
+        (sum, value) => sum + value,
+        0
+    );
+
+    let dominantEmotion = "joy";
+    let highestScore = -Infinity;
+
+    Object.keys(scores).forEach(emotion => {
+
+        if (scores[emotion] > highestScore) {
+            highestScore = scores[emotion];
+            dominantEmotion = emotion;
+        }
+
+    });
+
+    if (total === 0 || highestScore <= 0) {
+
+        document.getElementById("emotionIcon").textContent = "😐";
+        document.getElementById("emotionName").textContent = "Neutral";
+        document.getElementById("confidence").textContent =
+            "No strong emotion detected";
+
+        document.getElementById("meterFill").style.width = "20%";
+        document.getElementById("score").textContent =
+            "Confidence: 20%";
+
+        updateBars({
+            joy: 0,
+            sadness: 0,
+            anger: 0,
+            fear: 0,
+            surprise: 0,
+            love: 0
+        });
+
+        saveHistory("Neutral", text);
+
+        return;
+    }
+
+    const confidence = Math.min(
+        95,
+        Math.round(
+            (highestScore / total) * 100
+        )
+    );
+
+    const emotion = emotionWords[dominantEmotion];
+
+    document.getElementById("emotionIcon").textContent =
+        emotion.icon;
+
+    document.getElementById("emotionName").textContent =
+        emotion.name;
+
+    document.getElementById("confidence").textContent =
+        "Dominant emotion detected";
+
+    document.getElementById("meterFill").style.width =
+        confidence + "%";
+
+    document.getElementById("score").textContent =
+        "Confidence: " + confidence + "%";
+
+    const percentages = {};
+
+    Object.keys(scores).forEach(key => {
+
+        percentages[key] = total === 0
+            ? 0
+            : Math.round(
+                (Math.max(0, scores[key]) / total) * 100
+            );
+
+    });
+
+    updateBars(percentages);
+
+    saveHistory(emotion.name, text);
+}
+
+function updateBars(percentages) {
+
+    const emotions = [
+        "joy",
+        "sadness",
+        "anger",
+        "fear",
+        "surprise",
+        "love"
+    ];
+
+    emotions.forEach(emotion => {
+
+        const value = percentages[emotion] || 0;
+
+        document.getElementById(
+            emotion + "Value"
+        ).textContent = value + "%";
+
+        document.getElementById(
+            emotion + "Bar"
+        ).style.width = value + "%";
+
+    });
+}
+
+function clearText() {
+
+    textInput.value = "";
+
+    document.getElementById("charCount").textContent = "0";
+
+    document.getElementById("emotionIcon").textContent = "💭";
+
+    document.getElementById("emotionName").textContent =
+        "Waiting...";
+
+    document.getElementById("confidence").textContent =
+        "Enter text to begin analysis";
+
+    document.getElementById("meterFill").style.width = "0%";
+
+    document.getElementById("score").textContent =
+        "Confidence: 0%";
+
+    updateBars({
+        joy: 0,
+        sadness: 0,
+        anger: 0,
+        fear: 0,
+        surprise: 0,
+        love: 0
+    });
+}
+
+function saveHistory(emotion, text) {
+
+    let history =
+        JSON.parse(
+            localStorage.getItem("emotionHistory") || "[]"
+        );
+
+    history.unshift({
+        emotion: emotion,
+        text: text,
+        time: new Date().toLocaleString()
+    });
+
+    history = history.slice(0, 5);
+
+    localStorage.setItem(
+        "emotionHistory",
+        JSON.stringify(history)
+    );
+
+    displayHistory();
+}
+
+function displayHistory() {
+
+    const historyContainer =
+        document.getElementById("history");
+
+    const history =
+        JSON.parse(
+            localStorage.getItem("emotionHistory") || "[]"
+        );
+
+    if (history.length === 0) {
+
+        historyContainer.innerHTML =
+            '<div class="empty">No analysis yet.</div>';
+
+        return;
+    }
+
+    historyContainer.innerHTML = history.map(item => {
+
+        const icon = getEmotionIcon(item.emotion);
+
+        return `
+            <div class="history-item">
+                <div class="history-text">
+                    ${escapeHTML(item.text)}
+                </div>
+
+                <div class="history-emotion">
+                    ${icon} ${item.emotion}
+                </div>
+            </div>
+        `;
+
+    }).join("");
+}
+
+function getEmotionIcon(emotion) {
+
+    const icons = {
+        Joy: "😊",
+        Sadness: "😢",
+        Anger: "😡",
+        Fear: "😨",
+        Surprise: "😲",
+        Love: "❤️",
+        Neutral: "😐"
+    };
+
+    return icons[emotion] || "💭";
+}
+
+function escapeHTML(text) {
+
+    return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+displayHistory();
+
+</script>
+
+</body>
+</html>
